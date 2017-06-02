@@ -802,10 +802,10 @@ Crypto.prototype.userDeviceListChanged = function(userId) {
  * @param {Array<{userId: string, deviceId: string}>} recipients
  */
 Crypto.prototype.requestRoomKey = function(requestBody, recipients) {
-    this._outgoingRoomKeyRequestManager.makeRoomKeyRequest(
+    this._outgoingRoomKeyRequestManager.sendRoomKeyRequest(
         requestBody, recipients,
     ).catch((e) => {
-        // this normally means we couldn't talk to the store */
+        // this normally means we couldn't talk to the store
         console.error(
             'Error requesting key for event', e,
         );

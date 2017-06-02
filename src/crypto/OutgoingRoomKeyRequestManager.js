@@ -77,22 +77,28 @@ export default class OutgoingRoomKeyRequestManager {
     }
 
     /**
-     * Send off a room key request, if we don't already have one
+     * Send off a room key request, if we haven't already done so.
+     *
+     * The `requestBody` is compared (with a deep-equality check) against
+     * previous queued or sent requests and if it matches, no change is made.
+     * Otherwise, a request is added to the pending list, and a job is started
+     * in the background to send it.
      *
      * @param {module:crypto~RoomKeyRequestBody} requestBody
      * @param {Array<{userId: string, deviceId: string}>} recipients
      *
      * @returns {Promise} resolves when the request has been added to the
-     *    pending list
+     *    pending list (or we have established that a similar request already
+     *    exists)
      */
-    makeRoomKeyRequest(requestBody, recipients) {
+    sendRoomKeyRequest(requestBody, recipients) {
         return this._cryptoStore.getOrAddOutgoingRoomKeyRequest({
             requestBody: requestBody,
             recipients: recipients,
             requestId: this._baseApis.makeTxnId(),
             state: ROOM_KEY_REQUEST_STATES.UNSENT,
         }).then((req) => {
-            if (!req.state) {
+            if (req.state === ROOM_KEY_REQUEST_STATES.UNSENT) {
                 this._startTimer();
             }
         });
